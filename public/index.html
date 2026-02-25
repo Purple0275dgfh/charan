@@ -125,23 +125,34 @@
     };
 
     async function parseResponse(response) {
-      const payload = await response.json();
+      const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(payload.error || 'Request failed');
+        throw new Error(payload.error || payload.details || 'Request failed');
       }
       return payload;
+    }
+
+    async function apiRequest(url, options = {}) {
+      try {
+        const response = await fetch(url, options);
+        return await parseResponse(response);
+      } catch (error) {
+        if (error && /Failed to fetch/i.test(error.message)) {
+          throw new Error('Cannot connect to API server. Start backend with "npm start" and open http://localhost:3000.');
+        }
+        throw error;
+      }
     }
 
     document.getElementById('manual-bike-form').addEventListener('submit', async (event) => {
       event.preventDefault();
       await withButtonState('save-bike-btn', 'manual-status', 'Saving bike details', async () => {
         const body = Object.fromEntries(new FormData(event.target).entries());
-        const response = await fetch('/api/bikes', {
+        const payload = await apiRequest('/api/bikes', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
-        const payload = await parseResponse(response);
         event.target.reset();
         return payload;
       });
@@ -151,11 +162,10 @@
       event.preventDefault();
       await withButtonState('save-excel-btn', 'excel-status', 'Saving excel details', async () => {
         const formData = new FormData(event.target);
-        const response = await fetch('/api/bikes/upload-excel', {
+        const payload = await apiRequest('/api/bikes/upload-excel', {
           method: 'POST',
           body: formData
         });
-        const payload = await parseResponse(response);
         event.target.reset();
         return payload;
       });
@@ -165,12 +175,11 @@
       event.preventDefault();
       await withButtonState('save-testing-btn', 'testing-status', 'Saving testing details', async () => {
         const body = Object.fromEntries(new FormData(event.target).entries());
-        const response = await fetch('/api/testing', {
+        const payload = await apiRequest('/api/testing', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
-        const payload = await parseResponse(response);
         event.target.reset();
         return payload;
       });
@@ -180,12 +189,11 @@
       event.preventDefault();
       await withButtonState('save-modification-btn', 'modification-status', 'Saving modification details', async () => {
         const body = Object.fromEntries(new FormData(event.target).entries());
-        const response = await fetch('/api/modifications', {
+        const payload = await apiRequest('/api/modifications', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(body)
         });
-        const payload = await parseResponse(response);
         event.target.reset();
         return payload;
       });
@@ -197,11 +205,10 @@
         const formData = new FormData(event.target);
         const bikeId = formData.get('bike_id');
         formData.delete('bike_id');
-        const response = await fetch(`/api/bikes/${bikeId}/documents`, {
+        const payload = await apiRequest(`/api/bikes/${bikeId}/documents`, {
           method: 'POST',
           body: formData
         });
-        const payload = await parseResponse(response);
         event.target.reset();
         return payload;
       });
@@ -211,8 +218,7 @@
       event.preventDefault();
       await withButtonState('search-btn', 'search-status', 'Loading saved details', async () => {
         const bikeNumber = new FormData(event.target).get('bike_number');
-        const response = await fetch(`/api/bikes/search?bike_number=${encodeURIComponent(bikeNumber)}`);
-        return parseResponse(response);
+        return apiRequest(`/api/bikes/search?bike_number=${encodeURIComponent(bikeNumber)}`);
       });
     });
   </script>

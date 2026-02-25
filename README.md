@@ -38,3 +38,8 @@ The first sheet should include these headers:
 - `POST /api/modifications` - add modification
 - `POST /api/bikes/:bikeId/documents` - upload bike document (`document_file`)
 - `GET /api/bikes/search?bike_number=BK001` - full bike details
+
+## Troubleshooting
+
+- If UI shows `Failed to fetch`, backend API is not reachable.
+- Run `npm start` and use the app at `http://localhost:3000` so UI and API are on same origin.
