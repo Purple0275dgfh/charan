@@ -1,16 +1,22 @@
-{
-  "name": "bike-details-system",
-  "version": "1.0.0",
-  "description": "Bike details upload and manual entry system",
-  "main": "src/server.js",
-  "scripts": {
-    "start": "node src/server.js",
-    "check": "node --check src/server.js"
-  },
-  "dependencies": {
-    "express": "^4.19.2",
-    "multer": "^1.4.5-lts.1",
-    "sqlite3": "^5.1.7",
-    "xlsx": "^0.18.5"
-  }
-}
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..5e96033100a11fa164e51dd9da80501cde855522
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,16 @@
++{
++  "name": "bike-details-system",
++  "version": "1.0.0",
++  "description": "Bike details upload and manual entry system",
++  "main": "src/server.js",
++  "scripts": {
++    "start": "node src/server.js",
++    "check": "node --check src/server.js"
++  },
++  "dependencies": {
++    "express": "^4.19.2",
++    "multer": "^1.4.5-lts.1",
++    "sqlite3": "^5.1.7",
++    "xlsx": "^0.18.5"
++  }
++}
