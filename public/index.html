@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bike Details Upload System</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2rem; background: #f7f7f9; }
+    h1, h2 { color: #1c2a3a; }
+    .card { background: white; padding: 1rem 1.25rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    form { display: grid; gap: 0.5rem; }
+    input, select, button { padding: 0.55rem; border-radius: 6px; border: 1px solid #ccc; }
+    button { cursor: pointer; background: #005bd3; color: white; border: none; font-weight: 600; }
+    pre { background: #0f1720; color: #e8eef4; padding: 0.75rem; border-radius: 6px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🚲 Bike Details Upload & Manual Entry System</h1>
+
+  <section class="card">
+    <h2>Manual Bike Entry</h2>
+    <form id="manual-bike-form">
+      <input name="bike_number" placeholder="Bike Number" required />
+      <input name="model_name" placeholder="Model Name" required />
+      <input name="engine_number" placeholder="Engine Number" />
+      <input name="chassis_number" placeholder="Chassis Number" />
+      <input name="mfg_date" type="date" />
+      <input name="color" placeholder="Color" />
+      <select name="status">
+        <option>Production</option>
+        <option>Testing</option>
+        <option>Completed</option>
+      </select>
+      <button type="submit">Save Bike</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Upload Bike Data Excel (.xlsx)</h2>
+    <form id="excel-form" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".xlsx,.xls" required />
+      <button type="submit">Upload Excel</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Upload Bike Document</h2>
+    <form id="document-form" enctype="multipart/form-data">
+      <input name="bike_id" type="number" placeholder="Bike ID" required />
+      <input name="document_name" placeholder="Document Name" required />
+      <input name="document_type" placeholder="Document Type (PDF/Report/etc.)" />
+      <input type="file" name="document_file" required />
+      <button type="submit">Upload Document</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Search Full Bike Record</h2>
+    <form id="search-form">
+      <input name="bike_number" placeholder="Bike Number" required />
+      <button type="submit">Search</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Result</h2>
+    <pre id="result">No actions yet.</pre>
+  </section>
+
+  <script>
+    const result = document.getElementById('result');
+    const show = (data) => {
+      result.textContent = JSON.stringify(data, null, 2);
+    };
+
+    document.getElementById('manual-bike-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const body = Object.fromEntries(new FormData(event.target).entries());
+      const response = await fetch('/api/bikes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      show(await response.json());
+    });
+
+    document.getElementById('excel-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const response = await fetch('/api/bikes/upload-excel', {
+        method: 'POST',
+        body: formData
+      });
+      show(await response.json());
+    });
+
+    document.getElementById('document-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      const bikeId = formData.get('bike_id');
+      formData.delete('bike_id');
+      const response = await fetch(`/api/bikes/${bikeId}/documents`, {
+        method: 'POST',
+        body: formData
+      });
+      show(await response.json());
+    });
+
+    document.getElementById('search-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const bikeNumber = new FormData(event.target).get('bike_number');
+      const response = await fetch(`/api/bikes/search?bike_number=${encodeURIComponent(bikeNumber)}`);
+      show(await response.json());
+    });
+  </script>
+</body>
+</html>
